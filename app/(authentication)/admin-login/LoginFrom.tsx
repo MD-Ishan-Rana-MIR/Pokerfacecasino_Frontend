@@ -12,6 +12,7 @@ export default function LoginForm() {
     const [password, setPassword] = React.useState("");
     const [errors, setErrors] = React.useState<{ email?: string; password?: string }>({});
 
+
     function validate() {
         const newErrors: { email?: string; password?: string } = {};
 
@@ -80,8 +81,8 @@ export default function LoginForm() {
                             <Button
                                 type="button"
                                 variant="link"
-                                className="px-0 text-sm"
-                                onClick={() => console.log("Navigate to forgot password")}
+                                className="px-0 text-sm cursor-pointer "
+                                onClick={() => redirect("/VerifyEmail")}
                             >
                                 Forgot password?
                             </Button>

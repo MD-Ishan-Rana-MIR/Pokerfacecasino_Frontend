@@ -18,7 +18,7 @@ const MarketDetails = () => {
                 <div className=' md:mt-19 mt-9 flex items-center gap-x-2.5 ' >
                     <span onClick={handleBack} className='mt-1 cursor-pointer ' >
                         <svg width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <g clip-path="url(#clip0_29_259)">
+                            <g clipPath="url(#clip0_29_259)">
                                 <path d="M10.2841 19.484C9.99659 19.7715 9.60665 19.933 9.20007 19.933C8.79348 19.933 8.40354 19.7715 8.116 19.484L1.216 12.584C0.928544 12.2965 0.767061 11.9066 0.767061 11.5C0.767061 11.0934 0.928544 10.7035 1.216 10.4159L8.116 3.51591C8.40519 3.2366 8.79251 3.08205 9.19455 3.08555C9.59658 3.08904 9.98116 3.2503 10.2655 3.53459C10.5497 3.81888 10.711 4.20346 10.7145 4.6055C10.718 5.00753 10.5634 5.39486 10.2841 5.68405L6.1334 9.96665L20.7001 9.96665C21.1067 9.96665 21.4967 10.1282 21.7843 10.4157C22.0719 10.7033 22.2334 11.0933 22.2334 11.5C22.2334 11.9066 22.0719 12.2967 21.7843 12.5842C21.4967 12.8718 21.1067 13.0333 20.7001 13.0333L6.1334 13.0333L10.2841 17.3159C10.5716 17.6035 10.7331 17.9934 10.7331 18.4C10.7331 18.8066 10.5716 19.1965 10.2841 19.484Z" fill="#6B6B6B" />
                             </g>
                             <defs>
@@ -67,7 +67,7 @@ const MarketDetails = () => {
                     <h1 className=' md:text-5xl text-2xl font-medium text-[#1F2937] ' >Make a Prediction</h1>
                     <div className=' md:mt-20 mt-10 flex items-center gap-x-4.5  ' >
                         <button onClick={() => { setSeleceInput("yes") }} className={` font-semibold md:text-[28px] text-lg  py-3 md:py-7 cursor-pointer w-full rounded-[17px] ${selectInput == "yes" ? ' bg-[#E6F5EB] border-2 border-[#00993B] text-[#00993B] ' : ' text-[#8C8C8C] bg-white border border-[#E9EAEB] '} `} >YES</button>
-                        <button onClick={() => { setSeleceInput("no") }} className={` font-semibold md:text-[28px] text-lg  py-3 md:py-7 cursor-pointer w-full rounded-[17px] ${selectInput == "no" ? ' bg-[#fbedeb] border-2 border-[#FF4B31] text-[#FF4B31] ' : ' text-[#8C8C8C] bg-white border border-[#E9EAEB] '} `} >YES</button>
+                        <button onClick={() => { setSeleceInput("no") }} className={` font-semibold md:text-[28px] text-lg  py-3 md:py-7 cursor-pointer w-full rounded-[17px] ${selectInput == "no" ? ' bg-[#fbedeb] border-2 border-[#FF4B31] text-[#FF4B31] ' : ' text-[#8C8C8C] bg-white border border-[#E9EAEB] '} `} >No</button>
                     </div>
                     <div className=' md:mt-13 mt-6 ' >
                         <Input placeholder='0.00' className=' bg-white ' />

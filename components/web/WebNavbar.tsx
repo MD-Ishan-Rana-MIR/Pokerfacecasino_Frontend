@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import MaxWidth from "./MaxWidth"
 import Image from "next/image"
 import Link from "next/link"
@@ -29,6 +29,7 @@ const WebNavbar = () => {
                 console.log("singer", signer)
                 const userAddress = await signer.getAddress()
                 setAccount(userAddress)
+                localStorage.setItem("walletAddress", userAddress);
             } catch (err) {
                 console.error("Wallet connection error:", err)
             }
@@ -40,6 +41,44 @@ const WebNavbar = () => {
     };
 
     const [isOpenModal, setIsOpenModal] = useState(false);
+
+    // Logout function
+    const disconnectWallet = () => {
+        setAccount(null);
+        localStorage.removeItem("walletAddress");
+    };
+
+    // Listen for account change
+    useEffect(() => {
+        if (typeof window.ethereum !== "undefined" && window.ethereum) {
+            const handleAccountsChanged = (accounts: string[]) => {
+                if (accounts.length === 0) {
+                    setAccount(null)
+                } else {
+                    setAccount(accounts[0])
+                }
+            }
+
+                ; (window.ethereum as any).on("accountsChanged", handleAccountsChanged)
+
+            return () => {
+                ; (window.ethereum as any).removeListener(
+                    "accountsChanged",
+                    handleAccountsChanged
+                )
+            }
+        }
+    }, [])
+
+    // useEffect(() => {
+    //     const savedWallet = localStorage.getItem("walletAddress");
+    //     if (savedWallet) {
+    //         setAccount(savedWallet);
+    //     }
+    // }, []);
+
+    // Initialize wallet from localStorage
+
 
 
     return (
@@ -86,14 +125,21 @@ const WebNavbar = () => {
                             Top Up
                         </button>
 
-                        <button
-                            onClick={connectWallet}
-                            className=" bg-[#4F7FD6] py-2.5 px-6 rounded-2xl cursor-pointer text-white font-semibold  md:text-xl text-lg transition"
-                        >
-                            {account
-                                ? `${account.slice(0, 6)}...${account.slice(-4)}`
-                                : "Connect Wallet"}
-                        </button>
+                        {account ? (
+                            <button
+                                onClick={disconnectWallet}
+                                className="bg-red-500 py-2.5 px-6 rounded-2xl text-white font-semibold text-lg"
+                            >
+                                Logout
+                            </button>
+                        ) : (
+                            <button
+                                onClick={connectWallet}
+                                className="bg-[#4F7FD6] py-2.5 px-6 rounded-2xl text-white font-semibold text-lg"
+                            >
+                                Connect Wallet
+                            </button>
+                        )}
                     </div>
 
                     {/* Mobile Hamburger */}
