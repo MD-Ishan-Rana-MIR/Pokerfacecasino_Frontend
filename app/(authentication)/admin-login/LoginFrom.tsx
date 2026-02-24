@@ -5,7 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { redirect } from "next/navigation";
+// import { redirect } from "next/navigation";
+import { validate } from './../../../lib/validation/loginValidation';
+import { errorMessage } from "@/lib/msg/errorAlert";
+import { toast } from "sonner";
+import Loader from "@/components/navbar/spinner/Loader";
+import { useRouter } from "next/navigation";
+import { useLoginMutation } from "@/app/api/admin/auth/authApi";
 
 export default function LoginForm() {
     const [email, setEmail] = React.useState("");
@@ -13,32 +19,38 @@ export default function LoginForm() {
     const [errors, setErrors] = React.useState<{ email?: string; password?: string }>({});
 
 
-    function validate() {
-        const newErrors: { email?: string; password?: string } = {};
+    const [login, { isLoading }] = useLoginMutation()
 
-        if (!email) {
-            newErrors.email = "Email is required";
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            newErrors.email = "Please enter a valid email address";
-        }
-
-        if (!password) {
-            newErrors.password = "Password is required";
-        } else if (password.length < 6) {
-            newErrors.password = "Password must be at least 6 characters";
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+    const payload = {
+        email, password
     }
 
-    function onSubmit(e: React.FormEvent) {
+    const router = useRouter();
+
+    async function onSubmit(e: React.FormEvent) {
         e.preventDefault();
 
-        if (!validate()) return;
-        redirect("/admin-dashboard")
+        if (!validate(email, password, setErrors)) return;
 
-        console.log("Form Submitted:", { email, password });
+
+
+        try {
+
+            const res = await login(payload).unwrap()
+            if (res) {
+
+                toast.success(res?.message);
+                localStorage.setItem("token", res?.data?.token);
+                setEmail("");
+                setPassword("");
+                router.push("/admin-dashboard")
+            }
+        } catch (error) {
+            console.log(error)
+            return errorMessage(error)
+        }
+
+
     }
 
     return (
@@ -81,15 +93,18 @@ export default function LoginForm() {
                             <Button
                                 type="button"
                                 variant="link"
+
                                 className="px-0 text-sm cursor-pointer "
-                                onClick={() => redirect("/VerifyEmail")}
+                                onClick={() => router.push("/VerifyEmail")}
                             >
                                 Forgot password?
                             </Button>
                         </div>
 
-                        <Button type="submit" className="w-full">
-                            Sign In
+                        <Button disabled={isLoading} type="submit" className="w-full">
+                            {
+                                isLoading ? <Loader></Loader> : "Sign In"
+                            }
                         </Button>
                     </form>
                 </CardContent>

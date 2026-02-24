@@ -1,9 +1,16 @@
 "use client";
 
-import React from "react";
+import { useAdminProfileQuery } from "@/app/api/admin/auth/authApi";
 import Image from "next/image";
 
 const Navbar = () => {
+
+    // ===================================================== Admin Profile ==========================================================
+
+    const { data } = useAdminProfileQuery({});
+
+    console.log(data?.data?.user);
+
     return (
         <div className="flex items-center justify-between w-full">
             {/* Left Side */}
@@ -40,7 +47,8 @@ const Navbar = () => {
                 {/* User Avatar */}
                 <div className="cursor-pointer">
                     <Image
-                        src="/logo/user.svg"
+                        // src="/logo/user.svg"
+                        src={data?.data?.user?.avatar_url}
                         alt="user"
                         width={40}
                         height={40}
@@ -48,8 +56,8 @@ const Navbar = () => {
                     />
                 </div>
                 <div>
-                    <h1 className=" text-[#000000B2] text-2xl " >Admin User</h1>
-                    <p className=" text-[#626060] " >ad@gmail.com</p>
+                    <h1 className=" text-[#000000B2] text-2xl " >{data?.data?.user?.full_name}</h1>
+                    <p className=" text-[#626060] " >{data?.data?.user?.email}</p>
                 </div>
             </div>
         </div>

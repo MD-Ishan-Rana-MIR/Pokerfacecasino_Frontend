@@ -1,12 +1,13 @@
 "use client";
-import { useState } from "react";
+import { useUserBitProfileQuery } from "@/app/api/user/userBitApi";
+import { JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useState } from "react";
 
 /* ================================
 Types
 ================================ */
 
-type PredictionStatus = "OPEN" | "WON" | "LOST";
-type PredictionSide = "YES" | "NO";
+type PredictionStatus = "Open" | "Win" | "Lost";
+type PredictionSide = "Yes" | "No";
 
 interface Prediction {
     id: number;
@@ -22,53 +23,60 @@ interface Prediction {
 Data
 ================================ */
 
-const predictionsData: Prediction[] = [
-    {
-        id: 1,
-        title: "Will Bitcoin hit $100k?",
-        side: "YES",
-        amount: 500,
-        currency: "USDC",
-        status: "OPEN",
-    },
-    {
-        id: 2,
-        title: "US Fed Rate Cut in March",
-        side: "YES",
-        amount: 200,
-        currency: "USDC",
-        status: "WON",
-        claimAmount: 385,
-    },
-    {
-        id: 3,
-        title: "ETH to $4k?",
-        side: "NO",
-        amount: 300,
-        currency: "USDC",
-        status: "LOST",
-    },
-];
+// const predictionsData: Prediction[] = [
+//     {
+//         id: 1,
+//         title: "Will Bitcoin hit $100k?",
+//         side: "Yes",
+//         amount: 500,
+//         currency: "USDC",
+//         status: "Open",
+//     },
+//     {
+//         id: 2,
+//         title: "US Fed Rate Cut in March",
+//         side: "Yes",
+//         amount: 200,
+//         currency: "USDC",
+//         status: "Win",
+//         claimAmount: 385,
+//     },
+//     {
+//         id: 3,
+//         title: "ETH to $4k?",
+//         side: "No",
+//         amount: 300,
+//         currency: "USDC",
+//         status: "Lost",
+//     },
+// ];
 
 /* ================================
 Component
 ================================ */
 
 export default function PredictionTable() {
+
+    const { data } = useUserBitProfileQuery({});
+
+
+    const predictionsData = data?.data?.predictions || []
+    console.log("bit predictionsData is", predictionsData);
+
     const [activeTab, setActiveTab] =
-        useState<PredictionStatus>("OPEN");
+        useState<PredictionStatus>("Open");
 
     const filteredData = predictionsData.filter(
-        (item) => item.status === activeTab
+        (item: any) => item.status === activeTab
     );
 
     const getStatusStyles = (status: PredictionStatus) => {
         switch (status) {
-            case "OPEN":
+            case "Open":
                 return "bg-blue-100 text-blue-600";
-            case "WON":
+            case "Win":
                 return "bg-green-100 text-green-600";
-            case "LOST":
+            case "Lost":
                 return "bg-red-100 text-red-500";
             default:
                 return "";
@@ -80,7 +88,7 @@ export default function PredictionTable() {
 
             {/* Tabs */}
             <div className="flex flex-wrap gap-6 md:gap-10 mb-6">
-                {(["OPEN", "WON", "LOST"] as PredictionStatus[]).map(
+                {(["Open", "Win", "Loss"] as PredictionStatus[]).map(
                     (tab) => (
                         <button
                             key={tab}
@@ -90,10 +98,10 @@ export default function PredictionTable() {
                                 : "text-[#6B6B6B]"
                                 }`}
                         >
-                            {tab === "OPEN"
+                            {tab === "Open"
                                 ? "Open Predictions"
-                                : tab === "WON"
-                                    ? "Won Predictions"
+                                : tab === "Win"
+                                    ? "Win Predictions"
                                     : "Lost Predictions"}
                         </button>
                     )
@@ -118,7 +126,7 @@ export default function PredictionTable() {
                     </div>
                 )}
 
-                {filteredData.map((item) => (
+                {filteredData.map((item: Prediction) => (
                     <div
                         key={item.id}
                         className="grid grid-cols-5 px-6 lg:px-10 py-6 items-center border-t border-[#F0F0F0]"
@@ -128,7 +136,7 @@ export default function PredictionTable() {
                         </div>
 
                         <div
-                            className={`font-semibold text-sm lg:text-lg ${item.side === "YES"
+                            className={`font-semibold text-sm lg:text-lg ${item.side === "Yes"
                                 ? "text-green-600"
                                 : "text-red-500"
                                 }`}
@@ -151,19 +159,19 @@ export default function PredictionTable() {
                         </div>
 
                         <div>
-                            {item.status === "OPEN" && (
+                            {item.status === "Open" && (
                                 <span className="text-gray-400 italic text-sm">
                                     Waiting...
                                 </span>
                             )}
 
-                            {item.status === "WON" && item.claimAmount && (
+                            {item.status === "Win" && item.claimAmount && (
                                 <button className="bg-[#16A34A] hover:bg-[#15803D] text-white text-sm font-semibold px-5 py-2 rounded-lg transition">
                                     CLAIM {item.claimAmount.toFixed(2)}
                                 </button>
                             )}
 
-                            {item.status === "LOST" && (
+                            {item.status === "Lost" && (
                                 <span className="text-[#B5B5B5] text-sm">
                                     Closed
                                 </span>
@@ -175,7 +183,7 @@ export default function PredictionTable() {
 
             {/* Mobile Card Layout */}
             <div className="md:hidden space-y-4">
-                {filteredData.map((item) => (
+                {filteredData.map((item: Prediction) => (
                     <div
                         key={item.id}
                         className="border border-[#E5E7EB] rounded-xl p-4 bg-white"
@@ -187,7 +195,7 @@ export default function PredictionTable() {
                         <div className="flex justify-between mb-2">
                             <span className="text-[#B5B5B5]">Side</span>
                             <span
-                                className={`font-semibold ${item.side === "YES"
+                                className={`font-semibold ${item.side === "Yes"
                                     ? "text-green-600"
                                     : "text-red-500"
                                     }`}
@@ -214,19 +222,19 @@ export default function PredictionTable() {
                             </span>
                         </div>
 
-                        {item.status === "WON" && item.claimAmount && (
+                        {item.status === "Win" && item.claimAmount && (
                             <button className="w-full bg-[#16A34A] text-white py-2 rounded-lg font-semibold">
                                 CLAIM {item.claimAmount.toFixed(2)}
                             </button>
                         )}
 
-                        {item.status === "OPEN" && (
+                        {item.status === "Open" && (
                             <div className="text-gray-400 italic text-sm">
                                 Waiting...
                             </div>
                         )}
 
-                        {item.status === "LOST" && (
+                        {item.status === "Lost" && (
                             <div className="text-[#B5B5B5] text-sm">
                                 Closed
                             </div>

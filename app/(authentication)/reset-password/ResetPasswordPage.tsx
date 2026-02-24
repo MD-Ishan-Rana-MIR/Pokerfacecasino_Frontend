@@ -5,7 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
+import { getValidToken } from "@/lib/token/token";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function ResetPasswordPage() {
     const [password, setPassword] = React.useState("");
@@ -15,6 +17,18 @@ export default function ResetPasswordPage() {
         password?: string;
         confirmPassword?: string;
     }>({});
+
+    const router = useRouter()
+
+    React.useEffect(() => {
+        const token = getValidToken();
+
+        console.log("page token is", token)
+
+        if (!token) {
+            router.push("/admin-login"); // redirect if expired
+        }
+    }, [router]);
 
     function validate() {
         const newErrors: {
@@ -77,7 +91,7 @@ export default function ResetPasswordPage() {
                                     onClick={() => setShowPassword(!showPassword)}
                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground"
                                 >
-                                    {showPassword ? "Hide" : "Show"}
+                                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                                 </button>
                             </div>
                             {errors.password && (

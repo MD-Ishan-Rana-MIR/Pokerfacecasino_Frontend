@@ -4,11 +4,20 @@ import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { redirect } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { errorMessage } from "@/lib/msg/errorAlert";
+import { toast } from "sonner";
+import { saveToken } from "@/lib/token/token";
+import { useEmailVerifyMutation, useOtpVerifyMutation } from "@/app/api/admin/auth/authApi";
 
 export default function OtpPage() {
     const [otp, setOtp] = React.useState<string[]>(["", "", "", "", "", ""]);
     const [error, setError] = React.useState<string | null>(null);
+    const searchParams = useSearchParams();
+    const email = searchParams.get("email");
+
+    // resend otp 
+    const [emailVerify, { isLoading }] = useEmailVerifyMutation();
 
     const inputsRef = React.useRef<(HTMLInputElement | null)[]>([]);
 
@@ -34,7 +43,15 @@ export default function OtpPage() {
         }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+
+    const [otpVerify, { isLoading: otpLoading }] = useOtpVerifyMutation();
+
+
+    // ========================= otp verify ==========================
+
+    const router = useRouter();
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (otp.some((digit) => digit === "")) {
@@ -45,9 +62,54 @@ export default function OtpPage() {
         setError(null);
         const finalOtp = otp.join("");
         console.log("OTP Submitted:", finalOtp);
+        console.log(finalOtp)
 
-        redirect("/reset-password");
+
+        const payload = {
+            otp: finalOtp
+        }
+
+        try {
+            const res = await otpVerify(payload).unwrap();
+            if (res) {
+                console.log(res)
+                console.log(res?.data?.token)
+                saveToken(res?.data?.token)
+                toast.success(res?.message);
+                router.push("/reset-password");
+            }
+        } catch (error) {
+            return errorMessage(error)
+        }
     };
+
+
+
+    // ========================= resend otp ==========================
+
+    const payload = {
+        email: email
+    }
+
+    const handleResendOtp = async () => {
+        try {
+            const res = await emailVerify(payload).unwrap();
+            if (res) {
+                toast.success(res?.message)
+            }
+        } catch (error) {
+            return errorMessage(error)
+        }
+    }
+
+
+
+
+
+
+
+
+
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-muted/40 p-4">
@@ -97,8 +159,8 @@ export default function OtpPage() {
                                 type="button"
                                 variant="link"
                                 className="text-sm"
-                                
-                                onClick={() => console.log("Resend OTP")}
+
+                                onClick={handleResendOtp}
                             >
                                 Resend Code
                             </Button>

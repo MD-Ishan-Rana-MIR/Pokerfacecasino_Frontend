@@ -1,7 +1,21 @@
+"use client"
+import { useUserBitProfileQuery } from '@/app/api/user/userBitApi'
 import MaxWidth from '@/components/web/MaxWidth'
-import React from 'react'
+import { useRouter } from 'next/navigation'
+import React, { useEffect } from 'react'
 
 const Portfoli = () => {
+    const { data } = useUserBitProfileQuery({});
+
+    console.log("bit data is", data)
+    const router = useRouter();
+    useEffect(() => {
+        const address = localStorage.getItem("address");
+        if (!address) {
+            return router.push("/")
+        }
+    }, [router])
+
     return (
         <>
             <div className=' md:mt-29 mt-12 bg-[#F8FAFC] md:py-22.5  py-10 text-center  ' >
@@ -20,7 +34,9 @@ const Portfoli = () => {
                                 TOTAL INVESTED
                             </h1>
                             <div className="text-[#1F2937] md:text-5xl text-2xl font-semibold flex items-center justify-center md:mt-9 mt-4">
-                                $1,250.00
+                                {
+                                    data?.data?.total_invested_amount
+                                }
                                 <span className="text-[#B5B5B5] md:text-2xl text-lg ml-3">
                                     USDC
                                 </span>
@@ -33,7 +49,9 @@ const Portfoli = () => {
                                 ACTIVE PREDICTIONS
                             </h1>
                             <div className="text-[#4F7FD6] md:text-5xl text-2xl font-semibold md:mt-9 mt-4">
-                                4
+                                {
+                                    data?.data?.active_predictions
+                                }
                             </div>
                         </div>
 
@@ -43,7 +61,7 @@ const Portfoli = () => {
                                 TOTAL CLAIMABLE
                             </h1>
                             <div className="text-[#00993B] md:text-5xl text-2xl font-semibold flex items-center justify-center md:mt-9 mt-4">
-                                $1,250.00
+                                {data?.data?.total_claimable_amount}
                                 <span className="text-[#B0DFC2] md:text-2xl text-lg ml-3">
                                     USDC
                                 </span>

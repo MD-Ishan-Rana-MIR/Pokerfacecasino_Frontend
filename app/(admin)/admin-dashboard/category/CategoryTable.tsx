@@ -13,36 +13,104 @@ import {
     DialogTitle,
     DialogFooter,
 } from "@/components/ui/dialog";
+import Loader from "@/components/navbar/spinner/Loader";
+import { CategoryType } from "@/lib/type/categoryType";
+import { deleteAlert } from "@/lib/msg/deleteAlert";
+import { toast } from "sonner";
+import { errorMessage } from "@/lib/msg/errorAlert";
+import { useAllCategoryQuery, useCategoryUpdateMutation, useDeleteCategoryMutation } from "@/app/api/admin/category/categoryApi";
 
 interface Category {
     id: number;
     name: string;
-    status: "Active" | "Inactive";
+    status: string | "Active" | "Inactive";
 }
 
 const CategoryTable: React.FC = () => {
-    const [categories, setCategories] = useState<Category[]>([
-        { id: 1, name: "Crypto", status: "Active" },
-        { id: 2, name: "Sports", status: "Inactive" },
-        { id: 3, name: "Politics", status: "Active" },
-    ]);
+
 
     const [viewCategory, setViewCategory] = useState<Category | null>(null);
     const [updateCategory, setUpdateCategory] = useState<Category | null>(null);
 
-    const handleDelete = (id: number) => {
-        if (confirm("Are you sure you want to delete this category?")) {
-            setCategories(categories.filter((cat) => cat.id !== id));
+
+    // ==================== Category Delete ============================
+
+    const [deleteCategory] = useDeleteCategoryMutation();
+
+    const handleDelete = async (id: number) => {
+
+        try {
+            const res = await deleteAlert();
+
+            if (res.isConfirmed) {
+                const res = await deleteCategory(id).unwrap();
+                console.log(res)
+                if (res) {
+                    return toast.success(res?.message)
+                }
+            }
+        } catch (error) {
+            return errorMessage(error);
+        }
+
+
+
+    };
+
+
+
+    // ======================== ALL CATEGORY API =================================
+
+    const { data, isLoading } = useAllCategoryQuery({});
+
+    const categoryData: CategoryType[] = data?.data || [];
+
+
+    // ======================== CATEGORY UPDATE API =================================
+
+
+
+    const [categoryUpdate, { isLoading: update }] = useCategoryUpdateMutation()
+
+
+
+
+    const handleUpdateSave = async () => {
+        const id = updateCategory!.id;
+        if (!updateCategory) return;
+        try {
+            const res = await categoryUpdate({ id, updateCategory }).unwrap();
+            if (res) {
+                console.log(res)
+                setUpdateCategory(null);
+            }
+        } catch (error) {
+            return errorMessage(error)
         }
     };
 
-    const handleUpdateSave = () => {
-        if (!updateCategory) return;
-        setCategories((prev) =>
-            prev.map((cat) => (cat.id === updateCategory.id ? updateCategory : cat))
-        );
-        setUpdateCategory(null);
-    };
+
+
+
+
+
+
+
+
+
+
+
+
+    if (isLoading) {
+        return (
+            <div className=" mt-20 " >
+                <Loader  ></Loader>
+            </div>
+        )
+    }
+
+
+
 
     return (
         <div className="mt-18">
@@ -57,9 +125,9 @@ const CategoryTable: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y">
-                        {categories.map((cat) => (
+                        {categoryData.map((cat, i) => (
                             <tr key={cat.id} className="hover:bg-gray-50 transition">
-                                <td className="px-6 py-3 text-center">{cat.id}</td>
+                                <td className="px-6 py-3 text-center">{i + 1}</td>
                                 <td className="px-6 py-3 text-center">{cat.name}</td>
                                 <td className="px-6 py-3 text-center">
                                     <Badge
@@ -117,17 +185,24 @@ const CategoryTable: React.FC = () => {
                                                 <DialogHeader>
                                                     <DialogTitle className=" text-[#1F2937] text-3xl font-semibold  " >Category Details</DialogTitle>
                                                 </DialogHeader>
-                                                <div className="p-7.5 rounded-4xl bg-[#E9EAEB] mt-12 ">
+                                                {/* <div className="p-7.5 rounded-4xl bg-[#E9EAEB] mt-12 ">
                                                     <p className=" text-lg textColor " >INTERNAL REGISTER ID</p>
                                                     <p className=" text-[#4F7FD6] text-2xl " >#221123</p>
-                                                </div>
+                                                </div> */}
                                                 <div className="p-7.5 rounded-4xl bg-[#E9EAEB] mt-5 ">
                                                     <p className=" text-lg textColor " >DISPLAY NAME</p>
-                                                    <p className=" text-[#1F2937] font-semibold text-2xl " >Crypto</p>
+                                                    <p className=" text-[#1F2937] font-semibold text-2xl " >{viewCategory?.name}</p>
                                                 </div>
                                                 <div className="p-7.5 rounded-4xl bg-[#E9EAEB] mt-5 ">
                                                     <p className=" text-lg textColor " >STATUS</p>
-                                                    <p className=" text-[#00993B] font-semibold   text-2xl " >#221123</p>
+                                                    <Badge
+                                                        className={`${viewCategory.status === "Active"
+                                                            ? "bg-green-100 text-green-800"
+                                                            : "bg-red-100 text-red-800"
+                                                            }`}
+                                                    >
+                                                        {viewCategory.status}
+                                                    </Badge>
                                                 </div>
                                                 <DialogFooter className="flex justify-end">
                                                     <Button onClick={() => setViewCategory(null)}>Close</Button>
@@ -179,7 +254,11 @@ const CategoryTable: React.FC = () => {
                                                     >
                                                         Cancel
                                                     </Button>
-                                                    <Button onClick={handleUpdateSave}>Save</Button>
+                                                    <Button onClick={handleUpdateSave}>
+                                                        {
+                                                            update ? <div> <Loader></Loader> </div> : "Save"
+                                                        }
+                                                    </Button>
                                                 </DialogFooter>
                                             </DialogContent>
                                         </Dialog>
@@ -188,7 +267,7 @@ const CategoryTable: React.FC = () => {
                             </tr>
                         ))}
 
-                        {categories.length === 0 && (
+                        {categoryData.length === 0 && (
                             <tr>
                                 <td colSpan={4} className="text-center py-6 text-gray-500 font-medium">
                                     No categories found

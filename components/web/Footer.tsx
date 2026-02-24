@@ -1,16 +1,37 @@
-import React from 'react'
+"use client"
+// import React, { useEffect, useState } from 'react'
 import MaxWidth from './MaxWidth'
 import Image from 'next/image'
 import Link from 'next/link'
+// import { useRouter } from 'next/navigation'
 
 const Footer = () => {
+    // const router = useRouter()
+
+    // const [checkingAuth, setCheckingAuth] = useState(true);
+
+    // useEffect(() => {
+    //     if (typeof window === "undefined") return;
+
+    //     const token = localStorage.getItem("user-token");
+
+    //     if (!token) {
+    //         router.replace("/"); // better than push for auth redirect
+    //     } else {
+    //         // eslint-disable-next-line react-hooks/set-state-in-effect
+    //         setCheckingAuth(false);
+    //     }
+    // }, [router]);
+
+    // if (checkingAuth) return null; // or loading spinner
+
     return (
         <div className=' bg-[#F8FAFC]  md:pt-18 md:pb-37 px-4 py-4 ' >
             <MaxWidth>
                 <div className=' flex md:flex-row flex-col  w-full justify-between   ' >
                     <div className=' max-w-93 ' >
                         <Image src={"/logo/logo.svg"} width={303} height={56} alt='logo' />
-                        <h1 className=' mt-3 text-[#000000] italic text-[16px] ' >Predict global events and earn USDC on the Polygon network. Simple, decentralized predicting for everyone.</h1>
+                        <h1 className=' mt-3 text-[#000000] italic text-[16px] ' >Transparent prediction markets. Powered by USDC. Simple, decentralized predicting for everyone.</h1>
                     </div>
                     <div>
                         <h1 className=' text-[#1F2937] text-2xl font-semibold mt-3 ' >Quick Links</h1>
