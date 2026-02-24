@@ -1,8 +1,10 @@
-import React from 'react'
+"use client"
 import MarketHeader from './MarketHeader'
 import MarketList from './MarketList'
 
-const page = () => {
+const Page = () => {
+
+
     return (
         <div>
             <MarketHeader></MarketHeader>
@@ -11,4 +13,4 @@ const page = () => {
     )
 }
 
-export default page
+export default Page

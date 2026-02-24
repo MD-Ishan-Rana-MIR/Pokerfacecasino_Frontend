@@ -1,35 +1,45 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { redirect } from "next/navigation";
+import { forgetValidate } from "@/lib/validation/forgetValidation";
+import { errorMessage } from "@/lib/msg/errorAlert";
+import { toast } from "sonner";
+import Loader from "@/components/navbar/spinner/Loader";
+import { useEmailVerifyMutation } from "@/app/api/admin/auth/authApi";
 
 export default function EmailOnlyForm() {
+    const router = useRouter();
+
     const [email, setEmail] = React.useState("");
     const [error, setError] = React.useState<string | null>(null);
 
-    function validate() {
-        if (!email) {
-            setError("Email is required");
-            return false;
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            setError("Please enter a valid email address");
-            return false;
-        }
+    const [emailVerify, { isLoading }] = useEmailVerifyMutation();
 
-        setError(null);
-        return true;
-    }
-
-    function onSubmit(e: React.FormEvent) {
+    async function onSubmit(e: React.FormEvent) {
         e.preventDefault();
-        if (!validate()) return;
 
-        console.log("Email Submitted:", email);
-        redirect("/otp-verify");
+        if (!forgetValidate(email, (errors) => {
+            setError(errors.email || null);
+        })) return;
+
+        try {
+            const res = await emailVerify({ email }).unwrap();
+
+            if (res) {
+                console.log(res);
+                toast.success(res?.message);
+                setEmail("");
+            }
+
+            router.push(`/otp-verify?email=${encodeURIComponent(email)}`);
+        } catch (err) {
+            errorMessage(err);
+        }
     }
 
     return (
@@ -55,8 +65,8 @@ export default function EmailOnlyForm() {
                             )}
                         </div>
 
-                        <Button type="submit" className="w-full">
-                            Continue
+                        <Button disabled={isLoading} type="submit" className="w-full">
+                            {isLoading ? <Loader /> : "Continue"}
                         </Button>
                     </form>
                 </CardContent>

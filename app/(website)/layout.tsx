@@ -1,8 +1,8 @@
 import Footer from '@/components/web/Footer'
-import WebNavbar from '@/components/web/WebNavbar'
-import React from 'react'
+import WebNavbar from '@/components/web/WebNavbar';
 
 const layout = ({ children }: { children: React.ReactNode }) => {
+
     return (
         <>
             <WebNavbar></WebNavbar>

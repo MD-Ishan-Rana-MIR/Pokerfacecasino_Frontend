@@ -1,24 +1,26 @@
-// middleware.ts
-import { NextResponse } from "next/server"
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-export function middleware(req: Request) {
-    // 1️⃣ Get country from Vercel header
-    const country = req.headers.get("x-vercel-ip-country") || ""
+export function middleware(request: NextRequest) {
+    // 🌍 1️⃣ Get country from Vercel header
+    const country = request.headers.get("x-vercel-ip-country") || "";
 
-    // 2️⃣ If using your own server, you can use geoip-lite
-    // const ip = req.ip || req.headers.get("x-forwarded-for") || ""
-    // const geo = geoip.lookup(ip)
-    // const country = geo?.country || ""
-
-    // 3️⃣ Block UK
+    // 🚫 2️⃣ Block UK users
     if (country === "GB") {
-        return new NextResponse("Access denied from the UK", { status: 403 })
+        return new NextResponse("Access denied from the UK", { status: 403 });
     }
 
-    return NextResponse.next()
+    // 🔐 3️⃣ Protect /MARKETS route
+    const token = request.cookies.get("user-token");
+
+    if (!token && request.nextUrl.pathname.startsWith("/MARKETS")) {
+        return NextResponse.redirect(new URL("/", request.url));
+    }
+
+    return NextResponse.next();
 }
 
-// 4️⃣ Apply middleware to all routes
+// 4️⃣ Apply middleware to all routes except _next
 export const config = {
-    matcher: ["/((?!_next).*)"], // all routes except _next
-}
+    matcher: ["/((?!_next).*)"],
+};

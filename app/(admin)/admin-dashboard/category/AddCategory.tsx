@@ -1,7 +1,6 @@
 "use client"
 import React, { useState } from 'react'
 import { Button } from "@/components/ui/button";
-
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -9,16 +8,40 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
-    DialogFooter,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import { errorMessage } from '@/lib/msg/errorAlert';
+import { toast } from 'sonner';
+import Loader from '@/components/navbar/spinner/Loader';
+import { useCreateCategoryMutation } from '@/app/api/admin/category/categoryApi';
+
 const AddCategory = () => {
     const [category, setCategory] = useState("");
+    const [isDialogOpen, setIsDialogOpen] = useState(false); // control modal
 
-    const handleSave = () => {
-        console.log("New Category:", category);
-        setCategory("");
+    const [createCategory, { isLoading }] = useCreateCategoryMutation   ();
+
+    const payload = {
+        name: category
+    }
+
+    const handleSave = async () => {
+        try {
+            const res = await createCategory(payload).unwrap();
+
+            if (res) {
+                setCategory("");
+                toast.success(res?.message);
+
+                // Close the modal automatically
+                setIsDialogOpen(false);
+            }
+
+        } catch (error) {
+            return errorMessage(error)
+        }
     };
+
     return (
         <div>
             <div className="space-y-6">
@@ -34,7 +57,7 @@ const AddCategory = () => {
                     </div>
 
                     {/* Modal Trigger */}
-                    <Dialog>
+                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogTrigger asChild>
                             <Button className="rounded-xl px-6 text-xl ">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -61,12 +84,18 @@ const AddCategory = () => {
                                 />
                             </div>
 
-                            {/* <DialogFooter className="  "> */}
                             <div className=" space-y-4 " >
-                                <Button className="w-full text-xl font-medium  " onClick={handleSave}>Confirm & Save</Button>
-                                <button className=" text-[#8C8C8C] w-full text-xl font-medium cursor-pointer ">Cancel</button>
+                                <Button disabled={isLoading} className="w-full text-xl font-medium" onClick={handleSave}>
+                                    {isLoading ? <Loader /> : "Confirm & Save"}
+                                </Button>
+                                <button
+                                    type="button"
+                                    className=" text-[#8C8C8C] w-full text-xl font-medium cursor-pointer "
+                                    onClick={() => setIsDialogOpen(false)}
+                                >
+                                    Cancel
+                                </button>
                             </div>
-                            {/* </DialogFooter> */}
                         </DialogContent>
                     </Dialog>
                 </div>
@@ -75,4 +104,4 @@ const AddCategory = () => {
     )
 }
 
-export default AddCategory
+export default AddCategory;
